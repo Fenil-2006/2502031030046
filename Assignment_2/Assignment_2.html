@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram UI Clone</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ig-bg: #000000;
+  --ig-surface: #121212;
+  --ig-border: #262626;
+  --ig-text: #ffffff;
+  --ig-muted: #8e8e8e;
+  --ig-accent: #0095f6;
+  --ig-gradient: linear-gradient(45deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888);
+  --phone-w: 393px;
+  --phone-h: 852px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: #060608;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 50%, rgba(30,10,60,0.8) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 30%, rgba(10,30,60,0.6) 0%, transparent 60%);
+}
+
+/* ── PHONE SHELL ── */
+.phone-shell {
+  position: relative;
+  width: var(--phone-w);
+  height: var(--phone-h);
+  border-radius: 52px;
+  background: #1c1c1e;
+  box-shadow:
+    0 0 0 1px #3a3a3c,
+    0 0 0 10px #1c1c1e,
+    0 0 0 11px #3a3a3c,
+    inset 0 0 0 1.5px #2c2c2e,
+    0 50px 120px rgba(0,0,0,0.9),
+    0 20px 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+/* Dynamic island */
+.dynamic-island {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 34px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 9999;
+}
+
+/* Screen viewport */
+.screen-viewport {
+  width: 100%;
+  height: 100%;
+  border-radius: 52px;
+  overflow: hidden;
+  position: relative;
+}
+
+.screens-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.86, 0, 0.07, 1);
+  will-change: transform;
+}
+
+.screen {
+  min-width: var(--phone-w);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* ── STATUS BAR ── */
+.sb {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 28px 8px;
+  z-index: 100;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  pointer-events: none;
+}
+.sb-time { font-size: 15px; font-weight: 700; }
+.sb-icons { display: flex; align-items: center; gap: 6px; }
+.sb-signal { display: flex; align-items: flex-end; gap: 1.5px; }
+.sb-signal b { display: block; width: 3px; border-radius: 1.5px; background: currentColor; }
+.sb-signal b:nth-child(1){height:4px} .sb-signal b:nth-child(2){height:6px} .sb-signal b:nth-child(3){height:9px} .sb-signal b:nth-child(4){height:12px}
+.sb-wifi { font-size: 14px; }
+.sb-bat {
+  width: 25px; height: 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  position: relative;
+  padding: 1.5px;
+}
+.sb-bat::after {
+  content:''; position:absolute;
+  right:-4px; top:50%; transform:translateY(-50%);
+  width:2px; height:5px;
+  background:currentColor; border-radius:0 1.5px 1.5px 0; opacity:.5;
+}
+.sb-bat i { display:block; height:100%; width:70%; background:#f5a623; border-radius:1.5px; }
+
+/* ── BOTTOM NAV ── */
+.bnav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 84px;
+  background: rgba(0,0,0,0.95);
+  border-top: .5px solid var(--ig-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: 20px;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+}
+.bnav-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; cursor: pointer;
+}
+.bnav-icon svg { width: 26px; height: 26px; }
+
+/* ═══════════════════════════════════════════
+   SCREEN 1 — LOCK SCREEN
+═══════════════════════════════════════════ */
+#s1 { background: #000; }
+
+.lock-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 20%, #1550d4 0%, #0a2a8a 45%, transparent 75%),
+    radial-gradient(ellipse 80% 50% at 50% 85%, #0a28a0 0%, #061560 50%, transparent 80%),
+    #000;
+}
+.lock-orb-top {
+  position: absolute;
+  width: 340px; height: 340px;
+  border-radius: 50%;
+  top: -60px; left: 50%; transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(60,120,255,0.22) 0%, transparent 70%);
+  border: .5px solid rgba(80,140,255,0.25);
+}
+.lock-orb-bottom {
+  position: absolute;
+  width: 340px; height: 340px;
+  border-radius: 50%;
+  bottom: -60px; left: 50%; transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(30,80,220,0.18) 0%, transparent 70%);
+  border: .5px solid rgba(60,100,240,0.2);
+}
+.lock-waist {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(120,170,255,0.6) 30%, rgba(200,220,255,0.9) 50%, rgba(120,170,255,0.6) 70%, transparent 100%);
+}
+.lock-waist::before, .lock-waist::after {
+  content: '';
+  position: absolute;
+  top: -30px; left: 0; right: 0; height: 60px;
+  background: radial-gradient(ellipse 70% 30px at 50% 30px, rgba(100,150,255,0.08) 0%, transparent 100%);
+}
+.lock-info {
+  position: absolute;
+  top: 110px; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 2;
+}
+.lock-date {
+  color: rgba(255,255,255,0.88);
+  font-size: 16px; font-weight: 500;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+.lock-time {
+  color: white;
+  font-size: 88px; font-weight: 200;
+  letter-spacing: -4px;
+  line-height: 1;
+  font-family: 'Outfit', sans-serif;
+}
+.lock-shortcuts {
+  position: absolute;
+  bottom: 50px; left: 0; right: 0;
+  display: flex; justify-content: space-between;
+  padding: 0 44px;
+  z-index: 2;
+}
+.lock-shortcut {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  cursor: pointer;
+}
+.lock-shortcut.green { background: #34c759; border: none; }
+.lock-swipe-hint {
+  position: absolute;
+  bottom: 18px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.4);
+  font-size: 12px; font-weight: 500;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.swipe-line {
+  width: 130px; height: 5px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 2 — HOME SCREEN
+═══════════════════════════════════════════ */
+#s2 { background: #bcc4cc; }
+
+.home-wallpaper {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg,
+      #c8d8e8 0%,
+      #b0c4d8 25%,
+      #9ab0c8 40%,
+      #c2c8cc 55%,
+      #a8b4bc 70%,
+      #8898a4 85%,
+      #6a7c88 100%
+    );
+}
+/* Hangar building */
+.hangar {
+  position: absolute;
+  right: 20px; top: 200px;
+  width: 160px; height: 120px;
+  background: linear-gradient(180deg, #8a8a8a 0%, #6a6a6a 100%);
+  border-radius: 4px 4px 0 0;
+}
+.hangar-door {
+  position: absolute;
+  bottom: 0; left: 15px; right: 15px;
+  height: 80px;
+  background: #2a2a2a;
+  border-radius: 2px 2px 0 0;
+}
+/* Plane SVG inline */
+.plane-svg {
+  position: absolute;
+  top: 220px; left: 30px;
+  width: 200px; opacity: 0.85;
+}
+/* BMW Car - CSS art */
+.bmw-scene {
+  position: absolute;
+  bottom: 110px; left: 0; right: 0;
+  height: 200px;
+}
+/* Ground */
+.ground-strip {
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 80px;
+  background: linear-gradient(180deg, #b0bbc5 0%, #9aa5af 100%);
+}
+/* Tarmac lines */
+.tarmac-line {
+  position: absolute; bottom: 30px;
+  height: 3px; background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+}
+.home-clock {
+  position: absolute;
+  top: 72px; left: 0; right: 0;
+  text-align: center;
+  color: #111;
+  font-size: 76px; font-weight: 700;
+  letter-spacing: -3px;
+  z-index: 2;
+}
+.home-apps-row {
+  position: absolute;
+  top: 420px; left: 24px; right: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  z-index: 2;
+}
+.app-icon {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer;
+}
+.app-icon-img {
+  width: 60px; height: 60px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-size: 0;
+}
+.app-icon-label {
+  font-size: 11px; color: white;
+  font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  text-align: center;
+}
+.home-dock {
+  position: absolute;
+  bottom: 24px; left: 20px; right: 20px;
+  background: rgba(255,255,255,0.28);
+  backdrop-filter: blur(30px);
+  border-radius: 28px;
+  padding: 14px 28px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 10;
+  border: .5px solid rgba(255,255,255,0.4);
+}
+.dock-app {
+  width: 58px; height: 58px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.dock-app:active { transform: scale(0.92); }
+
+/* ═══════════════════════════════════════════
+   SCREEN 3 — IG SPLASH / LAUNCH
+═══════════════════════════════════════════ */
+#s3 {
+  background: linear-gradient(145deg, #3b0fa3 0%, #7b1f8e 30%, #c81858 60%, #b71515 100%);
+}
+.splash-wrap {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 28px;
+}
+.splash-icon-wrap {
+  width: 120px; height: 120px;
+  border-radius: 30px;
+  background: var(--ig-gradient);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 24px 60px rgba(188,24,136,0.55), 0 8px 20px rgba(0,0,0,0.4);
+}
+.splash-ig-svg { width: 70px; height: 70px; }
+.splash-name {
+  font-family: 'Dancing Script', cursive;
+  font-size: 52px; font-weight: 700;
+  color: white;
+  letter-spacing: -1px;
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 4 — IG FEED
+═══════════════════════════════════════════ */
+#s4 { background: var(--ig-bg); }
+
+.ig-topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 104px;
+  background: var(--ig-bg);
+  border-bottom: .5px solid var(--ig-border);
+  z-index: 50;
+}
+.ig-topbar-inner {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 48px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+.ig-wordmark {
+  font-family: 'Dancing Script', cursive;
+  font-size: 28px; color: white;
+  font-weight: 600; letter-spacing: -0.5px;
+}
+.ig-topbar-actions { display: flex; gap: 18px; }
+.ig-topbar-actions svg { width: 24px; height: 24px; stroke: white; fill: none; }
+
+.feed-area {
+  position: absolute;
+  top: 104px; bottom: 84px;
+  left: 0; right: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.feed-area::-webkit-scrollbar { display: none; }
+
+/* Stories strip */
+.stories-strip {
+  display: flex; gap: 12px;
+  padding: 10px 14px 12px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+  border-bottom: .5px solid var(--ig-border);
+}
+.stories-strip::-webkit-scrollbar { display: none; }
+
+.story {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 5px;
+  flex-shrink: 0; cursor: pointer;
+}
+.story-ring-outer {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  padding: 2.5px;
+  background: var(--ig-gradient);
+}
+.story-ring-outer.seen { background: var(--ig-border); }
+.story-avatar-inner {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: var(--ig-surface);
+  border: 2.5px solid var(--ig-bg);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  font-size: 26px;
+}
+.story-label {
+  font-size: 10px; color: var(--ig-muted);
+  text-align: center; width: 68px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.story-label.you { color: var(--ig-text); }
+
+/* Post */
+.post { border-bottom: .5px solid var(--ig-border); }
+.post-head {
+  display: flex; align-items: center;
+  padding: 10px 14px;
+  gap: 10px;
+}
+.post-av {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ig-border);
+  display: flex; align-items: center; justify-content: center;
+  background: #222; overflow: hidden;
+}
+.post-user { font-size: 13px; font-weight: 600; color: white; }
+.post-more { margin-left: auto; color: white; font-size: 18px; cursor: pointer; }
+
+/* Santorini illustration */
+.post-img {
+  width: 100%;
+  aspect-ratio: 1;
+  position: relative;
+  overflow: hidden;
+}
+.snt-sky {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    #120428 0%, #2a0e58 12%,
+    #4e1a8a 22%, #7c3dae 32%,
+    #a560c8 42%, #c880d8 50%,
+    #d4a0d8 57%, #e0b8c0 64%,
+    #eac0a0 70%, #e8a878 78%,
+    #d4885a 86%, #b86038 95%,
+    #8a3818 100%
+  );
+}
+.snt-moon {
+  position: absolute;
+  top: 55px; right: 70px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff8e0 0%, #f0d880 60%, #c8a840 100%);
+  box-shadow: 0 0 20px rgba(255,220,80,0.5);
+}
+.snt-stars {
+  position: absolute; top: 30px; left: 0; right: 0; height: 180px;
+}
+.star { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.8); }
+.snt-mountain {
+  position: absolute;
+  right: -30px; top: 80px;
+  width: 250px; height: 200px;
+  background: linear-gradient(160deg, #1a0d30 0%, #0d0820 100%);
+  clip-path: polygon(40% 100%, 0% 30%, 60% 0%, 100% 20%, 100% 100%);
+  opacity: 0.75;
+}
+.snt-sea {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 28%;
+  background: linear-gradient(180deg, #1a2f70 0%, #0d1844 100%);
+}
+/* Boats */
+.boat {
+  position: absolute;
+  bottom: 26%;
+}
+/* Buildings */
+.snt-building { position: absolute; background: #f5f0e8; }
+.snt-dome {
+  position: absolute;
+  background: #1a5fb4;
+  border-radius: 50% 50% 0 0;
+}
+.snt-lantern {
+  position: absolute;
+  border-radius: 50%;
+  background: #f5a623;
+  box-shadow: 0 0 10px 3px rgba(245,166,35,0.5);
+}
+.post-actions {
+  padding: 10px 14px 6px;
+  display: flex; align-items: center; gap: 14px;
+}
+.post-actions svg { width: 24px; height: 24px; }
+.post-save { margin-left: auto; }
+.post-likes { padding: 0 14px 4px; font-size: 13px; font-weight: 600; color: white; }
+.post-time { padding: 0 14px 12px; font-size: 11px; color: var(--ig-muted); }
+
+/* ═══════════════════════════════════════════
+   SCREEN 5 — DMs
+═══════════════════════════════════════════ */
+#s5 { background: var(--ig-bg); }
+
+.dm-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  background: var(--ig-bg);
+  z-index: 50;
+  padding-top: 54px;
+}
+.dm-header-row {
+  display: flex; justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px 8px;
+}
+.dm-user-name {
+  font-size: 17px; font-weight: 700;
+  color: white;
+  display: flex; align-items: center; gap: 4px;
+}
+.dm-user-name span { font-size: 12px; opacity: 0.5; }
+.dm-header-icons { display: flex; gap: 16px; }
+.dm-header-icons svg { width: 22px; height: 22px; stroke: white; fill: none; }
+.dm-searchbar {
+  margin: 4px 14px 12px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 9px;
+  color: var(--ig-muted); font-size: 14px;
+}
+.dm-searchbar svg { width: 16px; height: 16px; stroke: var(--ig-muted); fill: none; flex-shrink: 0; }
+
+.dm-list-area {
+  position: absolute;
+  top: 160px; bottom: 84px;
+  left: 0; right: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.dm-list-area::-webkit-scrollbar { display: none; }
+
+.dm-row {
+  display: flex; align-items: center;
+  padding: 10px 16px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background .1s;
+  position: relative;
+}
+.dm-row:active { background: #111; }
+.dm-av-wrap { position: relative; flex-shrink: 0; }
+.dm-av {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: #222;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; font-size: 22px;
+}
+.dm-av.has-story {
+  background: var(--ig-gradient);
+  padding: 2px;
+}
+.dm-av.has-story .inner-av {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 2px solid #000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.dm-green-dot {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: #34c759;
+  border: 2px solid #000;
+  position: absolute; bottom: 2px; right: 2px;
+}
+.dm-content { flex: 1; min-width: 0; }
+.dm-name { font-size: 14px; font-weight: 500; color: white; margin-bottom: 3px; }
+.dm-preview { font-size: 12px; color: var(--ig-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-preview.active-now { color: #34c759; }
+.dm-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.dm-time { font-size: 11px; color: var(--ig-muted); }
+.dm-cam-icon { color: var(--ig-muted); }
+.dm-cam-icon svg { width: 20px; height: 20px; stroke: var(--ig-muted); fill: none; }
+
+/* ═══════════════════════════════════════════
+   SCREEN 6 — REEL VIEW
+═══════════════════════════════════════════ */
+#s6 { background: #000; }
+
+.reel-fullscreen {
+  position: absolute; inset: 0;
+  background: linear-gradient(185deg,
+    #050200 0%,
+    #1a0800 8%,
+    #3d1500 15%,
+    #6b2800 22%,
+    #a84000 30%,
+    #d45a00 36%,
+    #e87010 42%,
+    #f08020 46%,
+    #e87010 50%,
+    #c85a00 56%,
+    #8a3000 64%,
+    #4a1500 75%,
+    #1a0500 88%,
+    #050100 100%
+  );
+}
+/* Cloud/fire wisps */
+.fire-wisp {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(18px);
+}
+.fw1 { width:220px;height:80px; background:rgba(220,60,0,0.4); top:60px; left:-40px; }
+.fw2 { width:280px;height:100px; background:rgba(180,40,0,0.35); top:20px; right:-60px; }
+.fw3 { width:160px;height:60px; background:rgba(255,100,0,0.3); top:110px; left:80px; }
+.fw4 { width:200px;height:70px; background:rgba(200,50,0,0.25); top:160px; right:20px; }
+.reel-ground-dark {
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 30%;
+  background: linear-gradient(0deg, #0a0500 0%, #150a00 60%, transparent 100%);
+}
+.reel-right-actions {
+  position: absolute;
+  right: 14px; bottom: 110px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 22px;
+  z-index: 10;
+}
+.reel-action-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px; cursor: pointer;
+}
+.reel-action-item svg { width: 26px; height: 26px; stroke: white; fill: none; }
+.reel-action-item span { font-size: 12px; color: white; font-weight: 500; }
+.reel-bottom-info {
+  position: absolute;
+  bottom: 90px; left: 14px;
+  right: 70px; z-index: 10;
+}
+.reel-username { color: white; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.reel-caption { color: rgba(255,255,255,0.8); font-size: 13px; line-height: 1.4; }
+.reel-song { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 8px; display:flex; align-items:center; gap:6px; }
+.reel-song svg { width:14px; height:14px; fill: white; }
+
+/* ═══════════════════════════════════════════
+   SCREEN 7 — EXPLORE
+═══════════════════════════════════════════ */
+#s7 { background: var(--ig-bg); }
+
+.explore-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding-top: 54px;
+  background: var(--ig-bg);
+  z-index: 50;
+}
+.explore-searchbar {
+  margin: 8px 14px 10px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 9px;
+  color: var(--ig-muted); font-size: 14px;
+}
+.explore-searchbar svg { width: 16px; height: 16px; stroke: var(--ig-muted); fill: none; flex-shrink: 0; }
+
+.explore-grid {
+  position: absolute;
+  top: 108px; bottom: 84px;
+  left: 0; right: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 130px;
+  gap: 2px;
+}
+.explore-grid::-webkit-scrollbar { display: none; }
+
+.eg-item {
+  position: relative; overflow: hidden;
+  cursor: pointer; background: #1a1a1a;
+}
+.eg-item.tall { grid-row: span 2; }
+.eg-item.wide { grid-column: span 2; }
+.eg-bg { width: 100%; height: 100%; object-fit: cover; }
+.eg-play {
+  position: absolute; top: 8px; right: 8px;
+  display: flex; align-items: center; gap: 3px;
+  color: white; font-size: 11px; font-weight: 600;
+}
+.eg-play svg { width: 14px; height: 14px; fill: white; }
+.eg-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 20px 8px 8px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+  color: white; font-size: 10px; font-weight: 600;
+  line-height: 1.3;
+}
+/* Grid item color fills */
+.egc1 { background: linear-gradient(135deg, #1a0535, #6b2fa0); }
+.egc2 { background: linear-gradient(135deg, #660000, #cc2200); }
+.egc3 { background: linear-gradient(135deg, #00234d, #0066bb); }
+.egc4 { background: linear-gradient(135deg, #1a3300, #4a8800); }
+.egc5 { background: linear-gradient(135deg, #300060, #7700dd); }
+.egc6 { background: linear-gradient(135deg, #7a3300, #dd7700); }
+.egc7 { background: linear-gradient(135deg, #001a2a, #005580); }
+.egc8 { background: linear-gradient(135deg, #220022, #550055); }
+.egc9 { background: linear-gradient(135deg, #0d1f44, #2244aa); }
+.egc10 { background: linear-gradient(135deg, #1a1a00, #555500); }
+.egc11 { background: linear-gradient(135deg, #001a1a, #004444); }
+.egc12 { background: linear-gradient(135deg, #1a0000, #660022); }
+
+/* ═══════════════════════════════════════════
+   SCREEN 8 — LOGIN
+═══════════════════════════════════════════ */
+#s8 {
+  background: linear-gradient(145deg, #3b0fa3 0%, #7a1f8e 28%, #c41858 58%, #b01515 100%);
+}
+.login-wrap {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 120px 36px 40px;
+}
+.login-wordmark {
+  font-family: 'Dancing Script', cursive;
+  font-size: 52px; font-weight: 700;
+  color: white; margin-bottom: 60px;
+  letter-spacing: -1px;
+}
+.login-field {
+  width: 100%;
+  background: rgba(180,30,40,0.7);
+  border: none; border-radius: 8px;
+  padding: 18px 20px;
+  color: rgba(0,0,0,0.65);
+  font-family: 'Dancing Script', cursive;
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  outline: none;
+  cursor: text;
+}
+.login-field::placeholder { color: rgba(0,0,0,0.55); }
+.login-button {
+  width: 100%;
+  background: rgba(55,60,175,0.85);
+  border: none; border-radius: 8px;
+  padding: 18px 20px;
+  color: rgba(0,0,0,0.75);
+  font-family: 'Dancing Script', cursive;
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 36px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.login-button:hover { opacity: 0.9; }
+.login-divider-line {
+  width: 100%; height: 1px;
+  background: rgba(255,255,255,0.25);
+  margin-bottom: 24px;
+}
+.login-alt-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: 17px; color: rgba(255,255,255,0.65);
+  text-align: center;
+}
+.login-alt-text a {
+  color: #ff8888; text-decoration: underline; cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN 9 — PROFILE
+═══════════════════════════════════════════ */
+#s9 { background: var(--ig-bg); }
+
+.profile-topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 54px;
+  display: flex; align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 16px 10px;
+  background: var(--ig-bg);
+  z-index: 50;
+}
+.profile-handle-top {
+  font-size: 16px; font-weight: 700;
+  color: white;
+}
+.profile-topbar svg { width: 24px; height: 24px; stroke: white; fill: none; }
+
+.profile-scroll {
+  position: absolute;
+  top: 54px; bottom: 84px;
+  left: 0; right: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.profile-scroll::-webkit-scrollbar { display: none; }
+
+.profile-hero {
+  display: flex; align-items: center;
+  padding: 16px 16px 12px;
+  gap: 20px;
+}
+.profile-pic-wrap {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1.5px solid var(--ig-border);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; font-size: 38px;
+  flex-shrink: 0;
+}
+.profile-numbers {
+  display: flex; gap: 28px;
+  flex: 1;
+}
+.pn { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.pn-val { font-size: 17px; font-weight: 700; color: white; }
+.pn-label { font-size: 12px; color: var(--ig-muted); }
+
+.profile-bio { padding: 0 16px 14px; }
+.profile-name { font-size: 14px; font-weight: 700; color: white; margin-bottom: 3px; }
+
+.profile-btns {
+  display: flex; gap: 8px;
+  padding: 0 16px 16px;
+}
+.pb {
+  flex: 1;
+  background: #262626;
+  border: none; border-radius: 10px;
+  padding: 9px 12px;
+  color: white; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Outfit', sans-serif;
+  transition: background .15s;
+}
+.pb:hover { background: #333; }
+.pb.icon-btn { flex: 0; padding: 9px 14px; font-size: 16px; }
+
+.profile-tabs {
+  display: flex;
+  border-bottom: .5px solid var(--ig-border);
+}
+.ptab {
+  flex: 1; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0.4;
+  border-bottom: 1.5px solid transparent;
+  transition: opacity .2s;
+}
+.ptab.active { opacity: 1; border-bottom-color: white; }
+.ptab svg { width: 22px; height: 22px; stroke: white; fill: none; }
+
+.pg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding-top: 2px;
+}
+.pg-item {
+  aspect-ratio: 1;
+  background: #1a1a1a;
+  border-radius: 2px;
+}
+
+/* ── NAV CONTROLS ── */
+.nav-arrow {
+  position: fixed;
+  top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 1000;
+  backdrop-filter: blur(10px);
+  transition: background .2s, transform .2s;
+}
+.nav-arrow:hover { background: rgba(255,255,255,0.14); transform: translateY(-50%) scale(1.05); }
+.nav-arrow.l { left: calc(50% - 197px - 70px); }
+.nav-arrow.r { right: calc(50% - 197px - 70px); }
+
+.screen-dots {
+  position: fixed;
+  bottom: 26px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 7px; z-index: 1000;
+}
+.dot {
+  height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.22);
+  cursor: pointer;
+  transition: all .3s;
+  width: 6px;
+}
+.dot.on { background: white; width: 20px; }
+
+.screen-label {
+  position: fixed;
+  bottom: 52px; left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.3);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 1000;
+}
+</style>
+</head>
+<body>
+
+<button class="nav-arrow l" onclick="go(-1)">&#8249;</button>
+<button class="nav-arrow r" onclick="go(1)">&#8250;</button>
+<div class="screen-label" id="slabel">Lock Screen</div>
+<div class="screen-dots" id="dots"></div>
+
+<div class="phone-shell">
+  <div class="dynamic-island"></div>
+  <div class="screen-viewport">
+    <div class="screens-track" id="track">
+
+      <!-- ════════════ S1 LOCK ════════════ -->
+      <div class="screen" id="s1">
+        <div class="lock-bg"></div>
+        <div class="lock-orb-top"></div>
+        <div class="lock-orb-bottom"></div>
+        <div class="lock-waist"></div>
+
+        <!-- Status bar -->
+        <div class="sb" style="color:white">
+          <span class="sb-time">5:19</span>
+          <div class="sb-icons">
+            <div class="sb-signal"><b></b><b></b><b></b><b></b></div>
+            <svg class="sb-wifi" width="16" height="12" viewBox="0 0 16 12" fill="white"><path d="M8 10.5a1 1 0 100 2 1 1 0 000-2zM1 4.5C3.5 2 5.6 1 8 1s4.5 1 7 3.5M3.5 7C5 5.5 6.4 5 8 5s3 .5 4.5 2"/></svg>
+            <div class="sb-bat" style="color:white"><i></i></div>
+          </div>
+        </div>
+
+        <div class="lock-info">
+          <div class="lock-date">Friday, January 2</div>
+          <div class="lock-time">5:19</div>
+        </div>
+
+        <div class="lock-shortcuts">
+          <div class="lock-shortcut green">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 5c0-.6.5-1 1-1h4l2 5-2.5 2.5a16 16 0 007 7L19 16l5 2v4a1 1 0 01-1 1C11 23 5 16 5 5z" fill="white"/></svg>
+          </div>
+          <div class="lock-shortcut" style="background:rgba(255,255,255,0.12)">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="3" y="5" width="22" height="18" rx="3" stroke="white" stroke-width="2"/><circle cx="14" cy="14" r="5" stroke="white" stroke-width="2"/><circle cx="21" cy="8" r="1.5" fill="white"/></svg>
+          </div>
+        </div>
+        <div class="lock-swipe-hint">
+          <div class="swipe-line"></div>
+          <span style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">Swipe up to unlock</span>
+        </div>
+      </div>
+
+      <!-- ════════════ S2 HOME ════════════ -->
+      <div class="screen" id="s2">
+        <div class="home-wallpaper"></div>
+
+        <!-- Hangar -->
+        <div style="position:absolute;right:30px;top:195px;width:150px;height:110px;background:linear-gradient(180deg,#888 0%,#666 100%);border-radius:3px 3px 0 0;z-index:1">
+          <div style="position:absolute;bottom:0;left:10px;right:10px;height:72px;background:#222;border-radius:2px 2px 0 0"></div>
+          <div style="position:absolute;top:-3px;left:-5px;right:-5px;height:8px;background:#777;border-radius:2px"></div>
+        </div>
+
+        <!-- Plane SVG -->
+        <svg style="position:absolute;top:228px;left:18px;z-index:2;width:190px" viewBox="0 0 190 56" fill="none">
+          <path d="M165 28 C145 22, 80 20, 10 26 L8 30 C80 28, 145 26, 162 32Z" fill="#c0c8d0"/>
+          <path d="M60 22 L80 8 L86 22Z" fill="#b0b8c0"/>
+          <path d="M45 30 L32 42 L52 30Z" fill="#b8c0c8"/>
+          <ellipse cx="170" cy="29" rx="18" ry="8" fill="#ccd4dc"/>
+          <rect cx="4" cy="24" width="12" height="8" rx="3" fill="#bbc3cb" x="2" y="24"/>
+          <circle cx="168" cy="28" r="4" fill="#d8e0e8"/>
+        </svg>
+
+        <!-- Status -->
+        <div class="sb" style="color:#111">
+          <span class="sb-time">5:19</span>
+          <div class="sb-icons">
+            <div class="sb-signal" style="color:#111"><b></b><b></b><b></b><b></b></div>
+            <svg class="sb-wifi" width="16" height="12" viewBox="0 0 16 12" fill="#111"><path d="M8 10.5a1 1 0 100 2 1 1 0 000-2z"/></svg>
+            <div class="sb-bat" style="color:#111"><i style="background:#111"></i></div>
+          </div>
+        </div>
+
+        <div class="home-clock">5:19</div>
+
+        <!-- BMW Car SVG - detailed -->
+        <svg style="position:absolute;bottom:110px;left:50%;transform:translateX(-50%);z-index:3;width:350px" viewBox="0 0 350 130" fill="none">
+          <defs>
+            <linearGradient id="bodyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c8d2dc"/><stop offset="60%" stop-color="#9aa4ae"/><stop offset="100%" stop-color="#6a7880"/></linearGradient>
+            <linearGradient id="roofG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b8c4ce"/><stop offset="100%" stop-color="#8090a0"/></linearGradient>
+            <radialGradient id="wheelG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#555"/><stop offset="55%" stop-color="#1a1a1a"/><stop offset="100%" stop-color="#0a0a0a"/></radialGradient>
+          </defs>
+          <!-- Shadow -->
+          <ellipse cx="175" cy="124" rx="155" ry="9" fill="rgba(0,0,0,0.25)"/>
+          <!-- Ground strip -->
+          <rect x="0" y="115" width="350" height="15" fill="#b0bcc8" rx="2"/>
+          <!-- Body -->
+          <path d="M22 70 L22 105 Q22 112 30 112 L320 112 Q328 112 328 105 L328 70Z" fill="url(#bodyG)"/>
+          <!-- Roof -->
+          <path d="M88 70 C95 32, 128 16, 162 13 L205 13 C238 16, 264 38, 272 70Z" fill="url(#roofG)"/>
+          <!-- Roof shine -->
+          <path d="M100 70 C106 38, 130 20, 162 17 L195 17 C220 20, 242 42, 250 70Z" fill="rgba(255,255,255,0.06)"/>
+          <!-- Windows -->
+          <path d="M96 68 C102 35, 128 20, 160 17 L196 17 C224 22, 246 44, 252 68Z" fill="#1a2535" opacity="0.9"/>
+          <!-- Window highlight -->
+          <path d="M100 68 C106 40, 130 25, 158 22 L178 22 C164 40, 148 58, 140 68Z" fill="rgba(255,255,255,0.04)"/>
+          <!-- B-pillar -->
+          <rect x="188" y="17" width="4" height="51" fill="#666" rx="1"/>
+          <!-- Front grille surround -->
+          <path d="M22 70 L22 90 Q22 95 27 95 L70 95 L70 70Z" fill="#1a1a1a"/>
+          <!-- Grille kidney shape -->
+          <path d="M27 74 L46 74 Q50 74 50 78 L50 90 Q50 94 46 94 L27 94 Q23 94 23 90 L23 78 Q23 74 27 74Z" fill="#111" stroke="#333" stroke-width="1"/>
+          <path d="M52 74 L68 74 Q71 74 71 78 L71 90 Q71 94 68 94 L52 94 Q49 94 49 90 L49 78 Q49 74 52 74Z" fill="#111" stroke="#333" stroke-width="1"/>
+          <!-- Grille slats -->
+          <line x1="23" y1="80" x2="71" y2="80" stroke="#2a2a2a" stroke-width="1.5"/>
+          <line x1="23" y1="86" x2="71" y2="86" stroke="#2a2a2a" stroke-width="1.5"/>
+          <!-- BMW roundel -->
+          <circle cx="47" cy="84" r="7" fill="white" stroke="#bbb" stroke-width="1"/>
+          <circle cx="47" cy="84" r="6" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+          <path d="M47 78 L47 90 M41 84 L53 84" stroke="#1a1a1a" stroke-width="1.5"/>
+          <path d="M41 84 Q44 78 47 78 L47 84Z" fill="#0066bb"/>
+          <path d="M47 84 Q50 78 53 78 Q53 84 47 84Z" fill="white"/>
+          <path d="M41 84 Q44 90 47 90 L47 84Z" fill="white"/>
+          <path d="M47 84 Q50 90 53 90 Q53 84 47 84Z" fill="#0066bb"/>
+          <!-- Headlight -->
+          <path d="M72 72 L105 72 Q112 72 112 78 L112 92 Q112 96 105 96 L72 96 Q70 96 70 92 L70 78 Q70 72 72 72Z" fill="#c8d4e0"/>
+          <!-- Headlight DRL -->
+          <path d="M73 76 L104 76 Q108 76 108 80 L108 88 Q108 90 104 90 L73 90 Q71 90 71 88 L71 80 Q71 76 73 76Z" fill="rgba(255,255,255,0.2)"/>
+          <path d="M75 82 Q90 78 106 82" stroke="rgba(220,240,255,0.9)" stroke-width="2" fill="none"/>
+          <!-- Side mirror -->
+          <path d="M112 76 L128 72 L128 82 L112 82Z" fill="#9aa4ae"/>
+          <!-- Door handles -->
+          <rect x="155" y="84" width="20" height="5" rx="2.5" fill="#888"/>
+          <rect x="240" y="84" width="20" height="5" rx="2.5" fill="#888"/>
+          <!-- Door lines -->
+          <line x1="120" y1="70" x2="120" y2="110" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
+          <line x1="215" y1="70" x2="215" y2="110" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
+          <!-- Rear lights -->
+          <path d="M316 72 L330 72 L330 96 L316 96 Q312 96 312 92 L312 76 Q312 72 316 72Z" fill="#c84040"/>
+          <path d="M318 76 L328 76 L328 92 L318 92 Q316 92 316 90 L316 78 Q316 76 318 76Z" fill="#e04040" opacity="0.7"/>
+          <!-- Rear bumper line -->
+          <path d="M275 108 Q305 105 328 105" stroke="#888" stroke-width="1.5" fill="none"/>
+          <!-- Wheels -->
+          <circle cx="92" cy="112" r="22" fill="url(#wheelG)"/>
+          <circle cx="92" cy="112" r="15" fill="#222"/>
+          <circle cx="92" cy="112" r="10" fill="#333" stroke="#555" stroke-width="1.5"/>
+          <circle cx="92" cy="112" r="3" fill="#888"/>
+          <!-- Spokes -->
+          <line x1="92" y1="97" x2="92" y2="107" stroke="#666" stroke-width="2.5"/>
+          <line x1="92" y1="117" x2="92" y2="127" stroke="#666" stroke-width="2.5"/>
+          <line x1="77" y1="112" x2="87" y2="112" stroke="#666" stroke-width="2.5"/>
+          <line x1="97" y1="112" x2="107" y2="112" stroke="#666" stroke-width="2.5"/>
+          <line x1="81" y1="101" x2="88" y2="108" stroke="#666" stroke-width="2"/>
+          <line x1="96" y1="116" x2="103" y2="123" stroke="#666" stroke-width="2"/>
+          <line x1="103" y1="101" x2="96" y2="108" stroke="#666" stroke-width="2"/>
+          <line x1="81" y1="123" x2="88" y2="116" stroke="#666" stroke-width="2"/>
+
+          <circle cx="260" cy="112" r="22" fill="url(#wheelG)"/>
+          <circle cx="260" cy="112" r="15" fill="#222"/>
+          <circle cx="260" cy="112" r="10" fill="#333" stroke="#555" stroke-width="1.5"/>
+          <circle cx="260" cy="112" r="3" fill="#888"/>
+          <line x1="260" y1="97" x2="260" y2="107" stroke="#666" stroke-width="2.5"/>
+          <line x1="260" y1="117" x2="260" y2="127" stroke="#666" stroke-width="2.5"/>
+          <line x1="245" y1="112" x2="255" y2="112" stroke="#666" stroke-width="2.5"/>
+          <line x1="265" y1="112" x2="275" y2="112" stroke="#666" stroke-width="2.5"/>
+          <line x1="249" y1="101" x2="256" y2="108" stroke="#666" stroke-width="2"/>
+          <line x1="264" y1="116" x2="271" y2="123" stroke="#666" stroke-width="2"/>
+          <line x1="271" y1="101" x2="264" y2="108" stroke="#666" stroke-width="2"/>
+          <line x1="249" y1="123" x2="256" y2="116" stroke="#666" stroke-width="2"/>
+          <!-- Front bumper -->
+          <path d="M22 95 Q16 95 14 100 Q14 108 20 110 L22 112" stroke="#888" stroke-width="1.5" fill="none"/>
+        </svg>
+
+        <!-- Dock -->
+        <div class="home-dock">
+          <!-- Phone -->
+          <div class="dock-app" style="background:#34c759">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M6 6C6 5.4 6.4 5 7 5H11L13 10L10.5 12.5A17 17 0 0019.5 21.5L22 19L27 21V25A1 1 0 0126 26C12 26 6 19 6 6z" fill="white"/></svg>
+          </div>
+          <!-- Maps -->
+          <div class="dock-app" style="background:linear-gradient(135deg,#2a2a2c,#1c1c1e)">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M16 4C11.6 4 8 7.6 8 12c0 6 8 16 8 16s8-10 8-16c0-4.4-3.6-8-8-8z" fill="#0095f6"/><circle cx="16" cy="12" r="3" fill="white"/></svg>
+          </div>
+          <!-- Instagram -->
+          <div class="dock-app" style="background:linear-gradient(135deg,#f09433,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888)">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="5" y="5" width="22" height="22" rx="7" stroke="white" stroke-width="2.5"/><circle cx="16" cy="16" r="6" stroke="white" stroke-width="2.5"/><circle cx="23" cy="9" r="2" fill="white"/></svg>
+          </div>
+          <!-- WhatsApp -->
+          <div class="dock-app" style="background:#25d366">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M16 4C9.4 4 4 9.4 4 16c0 2.1.5 4.1 1.5 5.9L4 28l6.3-1.7C12 27.4 14 28 16 28c6.6 0 12-5.4 12-12S22.6 4 16 4z" fill="white"/><path d="M12 11h1.5l2 5-1.2 1.2a8.5 8.5 0 004.5 4.5L20 20.5l5 2V24a1 1 0 01-1 1C13 25 9 21 9 12a1 1 0 011-1z" fill="#25d366"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════ S3 SPLASH ════════════ -->
+      <div class="screen" id="s3">
+        <div class="sb" style="color:rgba(255,255,255,0.7)">
+          <span class="sb-time">10:50</span>
+          <div class="sb-icons">
+            <div class="sb-signal" style="color:rgba(255,255,255,0.7)"><b></b><b></b><b></b><b></b></div>
+            <div class="sb-bat" style="color:rgba(255,255,255,0.7)"><i style="background:rgba(255,255,255,0.7)"></i></div>
+          </div>
+        </div>
+        <div class="splash-wrap">
+          <div class="splash-icon-wrap">
+            <svg class="splash-ig-svg" viewBox="0 0 70 70" fill="none">
+              <rect x="7" y="7" width="56" height="56" rx="16" stroke="white" stroke-width="5"/>
+              <circle cx="35" cy="35" r="14" stroke="white" stroke-width="5"/>
+              <circle cx="52" cy="18" r="5" fill="white"/>
+            </svg>
+          </div>
+          <div class="splash-name">Instagram</div>
+        </div>
+      </div>
+
+      <!-- ════════════ S4 FEED ════════════ -->
+      <div class="screen" id="s4">
+        <div class="sb" style="color:white"><span class="sb-time">10:50</span>
+          <div class="sb-icons"><div class="sb-signal"><b></b><b></b><b></b><b></b></div><div class="sb-bat"><i></i></div></div>
+        </div>
+        <div class="ig-topbar">
+          <div class="ig-topbar-inner">
+            <div class="ig-wordmark">Instagram</div>
+            <div class="ig-topbar-actions">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" stroke-width="2"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="feed-area">
+          <!-- Stories -->
+          <div class="stories-strip">
+            <div class="story">
+              <div class="story-ring-outer seen"><div class="story-avatar-inner">🪑</div></div>
+              <div class="story-label you">Your story</div>
+            </div>
+            <div class="story">
+              <div class="story-ring-outer"><div class="story-avatar-inner" style="background:#1a2030;font-size:18px">👤</div></div>
+              <div class="story-label">kaushal_10.6</div>
+            </div>
+            <div class="story">
+              <div class="story-ring-outer"><div class="story-avatar-inner" style="background:#202818">📷</div></div>
+              <div class="story-label">ansh_patel_84</div>
+            </div>
+            <div class="story">
+              <div class="story-ring-outer"><div class="story-avatar-inner" style="background:#1a1a28">🧍</div></div>
+              <div class="story-label">_gaurav_ch</div>
+            </div>
+            <div class="story">
+              <div class="story-ring-outer"><div class="story-avatar-inner" style="background:#281818">🏋️</div></div>
+              <div class="story-label">rajan_v</div>
+            </div>
+          </div>
+          <!-- Post -->
+          <div class="post">
+            <div class="post-head">
+              <div class="post-av" style="background:#222">🪑</div>
+              <div>
+                <div class="post-user">Bhavy@56</div>
+              </div>
+              <div class="post-more">···</div>
+            </div>
+            <!-- Santorini CSS painting -->
+            <div class="post-img">
+              <div class="snt-sky"></div>
+              <!-- Stars -->
+              <div class="snt-stars">
+                <div class="star" style="width:2px;height:2px;top:20px;left:30px"></div>
+                <div class="star" style="width:1.5px;height:1.5px;top:35px;left:80px"></div>
+                <div class="star" style="width:2px;height:2px;top:15px;left:140px"></div>
+                <div class="star" style="width:1.5px;height:1.5px;top:45px;left:200px"></div>
+                <div class="star" style="width:2px;height:2px;top:28px;left:260px"></div>
+                <div class="star" style="width:1px;height:1px;top:55px;left:310px"></div>
+                <div class="star" style="width:1.5px;height:1.5px;top:10px;left:350px"></div>
+                <div class="star" style="width:2px;height:2px;top:60px;left:40px"></div>
+                <div class="star" style="width:1px;height:1px;top:42px;left:120px"></div>
+                <div class="star" style="width:1.5px;height:1.5px;top:22px;left:178px"></div>
+                <div class="star" style="width:2px;height:2px;top:50px;left:230px"></div>
+                <div class="star" style="width:1px;height:1px;top:12px;left:300px"></div>
+              </div>
+              <!-- Moon -->
+              <div class="snt-moon"></div>
+              <!-- Mountain/hill -->
+              <div class="snt-mountain"></div>
+              <!-- Sea -->
+              <div class="snt-sea"></div>
+              <!-- Boats -->
+              <svg style="position:absolute;bottom:28%;left:20px" width="80" height="20" viewBox="0 0 80 20" fill="none">
+                <ellipse cx="25" cy="15" rx="20" ry="5" fill="rgba(255,255,255,0.15)"/>
+                <path d="M15 15 L25 5 L35 15Z" fill="rgba(255,255,255,0.1)"/>
+                <ellipse cx="60" cy="16" rx="14" ry="4" fill="rgba(255,255,255,0.1)"/>
+              </svg>
+              <!-- Buildings cluster -->
+              <svg style="position:absolute;bottom:27%;left:0;right:0" width="393" height="200" viewBox="0 0 393 200" fill="none">
+                <!-- Main buildings -->
+                <rect x="25" y="100" width="60" height="65" rx="3" fill="#f5f0e8"/>
+                <rect x="90" y="115" width="50" height="50" rx="3" fill="#ede8dc"/>
+                <rect x="145" y="125" width="45" height="40" rx="3" fill="#f0ebe0"/>
+                <rect x="30" y="70" width="45" height="35" rx="3" fill="#f0ece2"/>
+                <rect x="80" y="82" width="40" height="38" rx="3" fill="#e8e2d8"/>
+                <!-- Domes -->
+                <ellipse cx="52" cy="100" rx="22" ry="15" fill="#1a5fb4"/>
+                <ellipse cx="106" cy="115" rx="18" ry="12" fill="#1a5fb4"/>
+                <ellipse cx="165" cy="125" rx="16" ry="10" fill="#1355a0"/>
+                <ellipse cx="50" cy="70" rx="16" ry="10" fill="#1a5fb4"/>
+                <!-- Windows -->
+                <rect x="35" y="120" width="12" height="14" rx="2" fill="#a0b8d0" opacity="0.5"/>
+                <rect x="56" y="120" width="12" height="14" rx="2" fill="#a0b8d0" opacity="0.5"/>
+                <rect x="95" y="130" width="10" height="12" rx="2" fill="#a0b8d0" opacity="0.4"/>
+                <!-- Steps/terrace -->
+                <rect x="20" y="155" width="30" height="6" rx="1" fill="#d8d0c0"/>
+                <rect x="26" y="149" width="24" height="6" rx="1" fill="#d8d0c0"/>
+                <rect x="32" y="143" width="18" height="6" rx="1" fill="#d8d0c0"/>
+                <!-- Couple silhouette -->
+                <ellipse cx="218" cy="122" rx="5" ry="7" fill="#111"/>
+                <ellipse cx="228" cy="124" rx="4" ry="6" fill="#111"/>
+                <!-- Lanterns -->
+                <circle cx="28" cy="138" r="4" fill="#f5a623" filter="url(#glow)"/>
+                <circle cx="88" cy="130" r="3.5" fill="#f5a623"/>
+                <circle cx="142" cy="142" r="4" fill="#f5a623"/>
+                <circle cx="180" cy="135" r="3" fill="#f5a623"/>
+                <circle cx="60" cy="145" r="3.5" fill="#f5a623"/>
+                <defs>
+                  <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+              </svg>
+            </div>
+            <div class="post-actions">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <svg class="post-save" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="post-likes">1,234 likes</div>
+            <div class="post-time">2 hours ago</div>
+          </div>
+        </div>
+        <!-- Bottom nav -->
+        <div class="bnav">
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="white"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        </div>
+      </div>
+
+      <!-- ════════════ S5 DMs ════════════ -->
+      <div class="screen" id="s5">
+        <div class="sb" style="color:white"><span class="sb-time">10:50</span>
+          <div class="sb-icons"><div class="sb-signal"><b></b><b></b><b></b><b></b></div><div class="sb-bat"><i></i></div></div>
+        </div>
+        <div class="dm-top">
+          <div class="dm-header-row">
+            <div class="dm-user-name">fenil._.mehta._.777 <span>▾</span></div>
+            <div class="dm-header-icons">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <div class="dm-searchbar">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search or ask Meta AI
+          </div>
+        </div>
+        <div class="dm-list-area">
+          <!-- DM rows -->
+          <div class="dm-row">
+            <div class="dm-av-wrap">
+              <div class="dm-av has-story"><div class="inner-av" style="font-size:22px">👔</div></div>
+            </div>
+            <div class="dm-content">
+              <div class="dm-name">____itx_karan_kumawat____</div>
+              <div class="dm-preview">Sent a reel by wanderthe...</div>
+            </div>
+            <div class="dm-meta">
+              <div class="dm-time">2h</div>
+              <div class="dm-cam-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><polygon points="17 7 22 5 22 19 17 17 17 7"/></svg></div>
+            </div>
+          </div>
+          <div class="dm-row">
+            <div class="dm-av-wrap">
+              <div class="dm-av" style="background:#1a2818;font-size:22px">🤳</div>
+              <div class="dm-green-dot"></div>
+            </div>
+            <div class="dm-content">
+              <div class="dm-name">Pranshu kotak</div>
+              <div class="dm-preview">Sent a reel by mithamarc...</div>
+            </div>
+            <div class="dm-meta">
+              <div class="dm-time">3h</div>
+              <div class="dm-cam-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><polygon points="17 7 22 5 22 19 17 17 17 7"/></svg></div>
+            </div>
+          </div>
+          <div class="dm-row">
+            <div class="dm-av-wrap">
+              <div class="dm-av" style="background:#151a20;font-size:22px">🏔️</div>
+            </div>
+            <div class="dm-content">
+              <div class="dm-name">PARTH DOSHI 🔱</div>
+              <div class="dm-preview">Sent a reel by hiral_malak...</div>
+            </div>
+            <div class="dm-meta">
+              <div class="dm-time">4h</div>
+              <div class="dm-cam-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><polygon points="17 7 22 5 22 19 17 17 17 7"/></svg></div>
+            </div>
+          </div>
+          <div class="dm-row">
+            <div class="dm-av-wrap">
+              <div class="dm-av" style="background:#0a1520;font-size:22px">👥</div>
+              <div class="dm-green-dot"></div>
+            </div>
+            <div class="dm-content">
+              <div class="dm-name">VED PATEL</div>
+              <div class="dm-preview active-now">Active now</div>
+            </div>
+            <div class="dm-meta">
+              <div class="dm-cam-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><polygon points="17 7 22 5 22 19 17 17 17 7"/></svg></div>
+            </div>
+          </div>
+          <div class="dm-row">
+            <div class="dm-av-wrap">
+              <div class="dm-av" style="background:#0d0d1a;font-size:22px">🌋</div>
+              <div class="dm-green-dot"></div>
+            </div>
+            <div class="dm-content">
+              <div class="dm-name">Bhavy sevak</div>
+              <div class="dm-preview active-now">Active now</div>
+            </div>
+            <div class="dm-meta">
+              <div class="dm-cam-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><polygon points="17 7 22 5 22 19 17 17 17 7"/></svg></div>
+            </div>
+          </div>
+          <div class="dm-row">
+            <div class="dm-av-wrap">
+              <div class="dm-av" style="background:#1a4a9a;font-size:26px">😎</div>
+              <div class="dm-green-dot"></div>
+            </div>
+            <div class="dm-content">
+              <div class="dm-name">bakchodi madli</div>
+              <div class="dm-preview">bhavy.2311 is active now</div>
+            </div>
+            <div class="dm-meta">
+              <div class="dm-cam-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><polygon points="17 7 22 5 22 19 17 17 17 7"/></svg></div>
+            </div>
+          </div>
+          <div class="dm-row">
+            <div class="dm-av-wrap">
+              <div class="dm-av" style="background:#1a4a9a;font-size:26px">😎</div>
+            </div>
+            <div class="dm-content">
+              <div class="dm-name">Campus Comedians 🤙</div>
+              <div class="dm-preview">@sou.dating · 19h</div>
+            </div>
+            <div class="dm-meta">
+              <div class="dm-cam-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><polygon points="17 7 22 5 22 19 17 17 17 7"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <div class="bnav">
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        </div>
+      </div>
+
+      <!-- ════════════ S6 REEL ════════════ -->
+      <div class="screen" id="s6">
+        <div class="reel-fullscreen"></div>
+        <div class="fire-wisp fw1"></div>
+        <div class="fire-wisp fw2"></div>
+        <div class="fire-wisp fw3"></div>
+        <div class="fire-wisp fw4"></div>
+        <div class="reel-ground-dark"></div>
+
+        <!-- Ferris wheel SVG -->
+        <svg style="position:absolute;right:-40px;top:30px;z-index:2;opacity:0.85" width="300" height="680" viewBox="0 0 300 680" fill="none">
+          <!-- Stand pole -->
+          <line x1="150" y1="290" x2="150" y2="560" stroke="#4a4a4a" stroke-width="9"/>
+          <!-- Support legs -->
+          <line x1="150" y1="540" x2="60" y2="580" stroke="#4a4a4a" stroke-width="6"/>
+          <line x1="150" y1="540" x2="240" y2="580" stroke="#4a4a4a" stroke-width="6"/>
+          <line x1="150" y1="520" x2="70" y2="570" stroke="#3a3a3a" stroke-width="4"/>
+          <line x1="150" y1="520" x2="230" y2="570" stroke="#3a3a3a" stroke-width="4"/>
+          <!-- Cross bracing -->
+          <line x1="90" y1="555" x2="200" y2="540" stroke="#3a3a3a" stroke-width="3"/>
+          <line x1="100" y1="540" x2="210" y2="555" stroke="#3a3a3a" stroke-width="3"/>
+          <!-- Main ring -->
+          <circle cx="150" cy="150" r="128" stroke="#555" stroke-width="3.5" fill="none"/>
+          <circle cx="150" cy="150" r="120" stroke="#444" stroke-width="1" fill="none" stroke-dasharray="4 8"/>
+          <!-- Hub -->
+          <circle cx="150" cy="150" r="14" fill="#555" stroke="#777" stroke-width="2"/>
+          <circle cx="150" cy="150" r="6" fill="#888"/>
+          <!-- 8 spokes -->
+          <line x1="150" y1="22" x2="150" y2="278" stroke="#4a4a4a" stroke-width="2.5"/>
+          <line x1="22" y1="150" x2="278" y2="150" stroke="#4a4a4a" stroke-width="2.5"/>
+          <line x1="59" y1="59" x2="241" y2="241" stroke="#4a4a4a" stroke-width="2.5"/>
+          <line x1="241" y1="59" x2="59" y2="241" stroke="#4a4a4a" stroke-width="2.5"/>
+          <!-- Inner ring -->
+          <circle cx="150" cy="150" r="60" stroke="#444" stroke-width="2" fill="none"/>
+          <line x1="150" y1="90" x2="150" y2="210" stroke="#3a3a3a" stroke-width="1.5"/>
+          <line x1="90" y1="150" x2="210" y2="150" stroke="#3a3a3a" stroke-width="1.5"/>
+          <!-- Gondolas (8 positions) -->
+          <!-- Top -->
+          <rect x="135" y="8" width="30" height="22" rx="5" fill="#5a5a5a" stroke="#888" stroke-width="1.5"/>
+          <rect x="138" y="11" width="24" height="16" rx="3" fill="#2a2a2a"/>
+          <!-- Bottom -->
+          <rect x="135" y="268" width="30" height="22" rx="5" fill="#6a6a6a" stroke="#888" stroke-width="1.5"/>
+          <!-- Left -->
+          <rect x="8" y="135" width="28" height="22" rx="5" fill="#5a5a5a" stroke="#888" stroke-width="1.5"/>
+          <!-- Right -->
+          <rect x="264" y="135" width="28" height="22" rx="5" fill="#5a5a5a" stroke="#888" stroke-width="1.5"/>
+          <!-- Diagonals -->
+          <rect x="46" y="48" width="28" height="22" rx="5" fill="#666" stroke="#888" stroke-width="1.5"/>
+          <rect x="226" y="48" width="28" height="22" rx="5" fill="#5a5a5a" stroke="#888" stroke-width="1.5"/>
+          <rect x="226" y="228" width="28" height="22" rx="5" fill="#666" stroke="#888" stroke-width="1.5"/>
+          <rect x="46" y="228" width="28" height="22" rx="5" fill="#5a5a5a" stroke="#888" stroke-width="1.5"/>
+          <!-- Birds -->
+          <path d="M40 200 Q48 195 56 200 M58 198 Q64 193 70 198" stroke="#1a0800" stroke-width="2" fill="none"/>
+          <path d="M20 230 Q27 225 34 230" stroke="#1a0800" stroke-width="2" fill="none"/>
+        </svg>
+
+        <!-- Reel UI overlay -->
+        <div class="sb" style="color:white"><span class="sb-time">10:50</span>
+          <div class="sb-icons"><div class="sb-signal"><b></b><b></b><b></b><b></b></div><div class="sb-bat"><i></i></div></div>
+        </div>
+
+        <div class="reel-right-actions">
+          <div class="reel-action-item">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+            <span>12K</span>
+          </div>
+          <div class="reel-action-item">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span>234</span>
+          </div>
+          <div class="reel-action-item">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <span>Share</span>
+          </div>
+          <div class="reel-action-item" style="margin-top:4px">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="white"/><circle cx="12" cy="12" r="1" fill="white"/><circle cx="12" cy="19" r="1" fill="white"/></svg>
+          </div>
+          <!-- Profile -->
+          <div style="width:44px;height:44px;border-radius:50%;background:#222;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer">🎡</div>
+        </div>
+
+        <div class="reel-bottom-info">
+          <div class="reel-username">@ferris_sunsets</div>
+          <div class="reel-caption">Golden hour at the fair 🎡🔥 The sky was on fire tonight #sunset #ferriswheel #vibes</div>
+          <div class="reel-song">
+            <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 18a3 3 0 01-6 0 3 3 0 016 0zM21 16a3 3 0 01-6 0 3 3 0 016 0z"/></svg>
+            Original Audio · ferris_sunsets
+          </div>
+        </div>
+
+        <div class="bnav" style="background:transparent;border-color:rgba(255,255,255,0.12)">
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        </div>
+      </div>
+
+      <!-- ════════════ S7 EXPLORE ════════════ -->
+      <div class="screen" id="s7">
+        <div class="sb" style="color:white"><span class="sb-time">10:50</span>
+          <div class="sb-icons"><div class="sb-signal"><b></b><b></b><b></b><b></b></div><div class="sb-bat"><i></i></div></div>
+        </div>
+        <div class="explore-top">
+          <div class="explore-searchbar">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search with Meta AI
+          </div>
+        </div>
+        <div class="explore-grid">
+          <!-- Row 1: tall + 2 normal -->
+          <div class="eg-item tall egc1">
+            <div class="eg-label">Interesting facts<br>about Karna</div>
+            <div class="eg-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>777K</div>
+          </div>
+          <div class="eg-item egc2"><div class="eg-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>1.9M</div></div>
+          <div class="eg-item egc3"><div class="eg-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>623K</div></div>
+          <!-- Row 1 cont (tall spans row 2) -->
+          <div class="eg-item egc4"><div class="eg-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>549K</div></div>
+          <div class="eg-item egc5"><div class="eg-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>1M</div></div>
+          <!-- Row 3 -->
+          <div class="eg-item egc6"><div class="eg-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>934K</div></div>
+          <div class="eg-item egc7"><div class="eg-label">Helicópteros<br>Militares</div></div>
+          <div class="eg-item wide egc8"><div class="eg-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>2.3M</div><div class="eg-label">Still Friends · Forever Icons</div></div>
+          <!-- Row 4 -->
+          <div class="eg-item egc9"></div>
+          <div class="eg-item egc10"></div>
+          <div class="eg-item egc11"></div>
+          <div class="eg-item egc12"></div>
+        </div>
+        <div class="bnav">
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        </div>
+      </div>
+
+      <!-- ════════════ S8 LOGIN ════════════ -->
+      <div class="screen" id="s8">
+        <div class="sb" style="color:rgba(255,255,255,0.6)"><span class="sb-time">10:50</span>
+          <div class="sb-icons"><div class="sb-signal" style="color:rgba(255,255,255,0.6)"><b></b><b></b><b></b><b></b></div><div class="sb-bat" style="color:rgba(255,255,255,0.5)"><i style="background:rgba(255,255,255,0.5)"></i></div></div>
+        </div>
+        <div class="login-wrap">
+          <div class="login-wordmark">Instagram</div>
+          <input class="login-field" placeholder="Enter your email" type="email">
+          <input class="login-field" placeholder="Password" type="password">
+          <button class="login-button">Login</button>
+          <div class="login-divider-line"></div>
+          <div class="login-alt-text">login with facebook, <a>sign up</a></div>
+        </div>
+      </div>
+
+      <!-- ════════════ S9 PROFILE ════════════ -->
+      <div class="screen" id="s9">
+        <div class="sb" style="color:white"><span class="sb-time">10:50</span>
+          <div class="sb-icons"><div class="sb-signal"><b></b><b></b><b></b><b></b></div><div class="sb-bat"><i></i></div></div>
+        </div>
+        <div class="profile-topbar">
+          <div style="width:24px"></div>
+          <div class="profile-handle-top">Mehta._.Fenil._.777</div>
+          <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </div>
+        <div class="profile-scroll">
+          <div class="profile-hero">
+            <div class="profile-pic-wrap">🪑</div>
+            <div class="profile-numbers">
+              <div class="pn"><div class="pn-val">0</div><div class="pn-label">posts</div></div>
+              <div class="pn"><div class="pn-val">308</div><div class="pn-label">followers</div></div>
+              <div class="pn"><div class="pn-val">140</div><div class="pn-label">friends</div></div>
+            </div>
+          </div>
+          <div class="profile-bio">
+            <div class="profile-name">Mehta._.Fenil._.777</div>
+          </div>
+          <div class="profile-btns">
+            <button class="pb">Edit profile</button>
+            <button class="pb">Share profile</button>
+            <button class="pb icon-btn">👤+</button>
+          </div>
+          <!-- Saved / tagged / reels tab row -->
+          <div style="display:flex;gap:0;border-bottom:.5px solid var(--ig-border);padding:0 16px 12px">
+            <div style="display:flex;align-items:center;gap:6px;background:#262626;border-radius:20px;padding:6px 14px;cursor:pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+              <span style="color:white;font-size:12px;font-weight:600">Saved</span>
+            </div>
+          </div>
+          <div class="profile-tabs">
+            <div class="ptab active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+            <div class="ptab"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="ptab"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          </div>
+          <div class="pg-grid">
+            <div class="pg-item"></div><div class="pg-item"></div><div class="pg-item"></div>
+            <div class="pg-item"></div><div class="pg-item"></div><div class="pg-item"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;padding:48px 20px;gap:12px">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2M8 7V5a2 2 0 014 0"/></svg>
+            <span style="color:#444;font-size:14px">No Posts Yet</span>
+            <span style="color:#333;font-size:12px;text-align:center">Share photos and they'll appear<br>on your profile.</span>
+          </div>
+        </div>
+        <div class="bnav">
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="bnav-icon"><svg viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const LABELS = ['Lock Screen','Home Screen','IG Launch','Feed','Messages','Reel','Explore','Login','Profile'];
+let cur = 0;
+const N = 9;
+const track = document.getElementById('track');
+const dotsEl = document.getElementById('dots');
+const labelEl = document.getElementById('slabel');
+
+// Build dots
+for(let i=0;i<N;i++){
+  const d = document.createElement('div');
+  d.className='dot'+(i===0?' on':'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+}
+
+function goTo(i){
+  if(i<0||i>=N) return;
+  cur=i;
+  track.style.transform=`translateX(-${cur*393}px)`;
+  document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('on',j===cur));
+  labelEl.textContent=LABELS[cur];
+}
+function go(d){ goTo(cur+d); }
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') go(1);
+  if(e.key==='ArrowLeft') go(-1);
+});
+
+// Touch swipe
+let tx=0;
+track.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+track.addEventListener('touchend',e=>{
+  const dx=tx-e.changedTouches[0].clientX;
+  if(Math.abs(dx)>50) go(dx>0?1:-1);
+},{passive:true});
+</script>
+</body>
+</html>
